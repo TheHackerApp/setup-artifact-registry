@@ -29,6 +29,7 @@ runs:
         workload_identity_provider: ${{ inputs.workload_identity_provider }}
 
     - name: Install GCR standalone credential helper
+      shell: bash
       run: |
         wget -qO docker-credential-gcr.tar.gz https://github.com/GoogleCloudPlatform/docker-credential-gcr/releases/download/v${{ inputs.version }}/docker-credential-gcr_linux_amd64-${{ inputs.version }}.tar.gz
         tar -zxf docker-credential-gcr.tar.gz -C /usr/local/bin docker-credential-gcr
@@ -36,4 +37,5 @@ runs:
         rm docker-credential-gcr.tar.gz
 
     - name: Configure Artifact Registry credentials
+      shell: bash
       run: docker-credential-gcr configure-docker --registries=${{ inputs.registries }}
