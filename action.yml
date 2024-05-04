@@ -1,0 +1,39 @@
+---
+name: Setup Artifact Registry
+description: Setup Google Cloud Artifact Registry access
+branding:
+  icon: archive
+  color: green
+
+inputs:
+  registries:
+    description: A comma-separated list of the registry hostnames to configure
+    required: true
+  project_id:
+    description: The Google Cloud project ID
+    required: true
+  workload_identity_provider:
+    description: The workload identity provider to use
+    required: true
+  version:
+    description: The version of docker-credential-gcr to use
+    required: false
+    default: "2.1.22"
+
+runs:
+  using: composite
+  steps:
+    - uses: google-github-actions/auth@v2
+      with:
+        project_id: ${{ inputs.project_id }}
+        workload_identity_provider: ${{ inputs.workload_identity_provider }}
+
+    - name: Install GCR standalone credential helper
+      run: |
+        wget -qO docker-credential-gcr.tar.gz https://github.com/GoogleCloudPlatform/docker-credential-gcr/releases/download/v${{ inputs.version }}/docker-credential-gcr_linux_amd64-${{ inputs.version }}.tar.gz
+        tar -zxf docker-credential-gcr.tar.gz -C /usr/local/bin docker-credential-gcr
+        chmod +x /usr/local/bin/docker-credential-gcr
+        rm docker-credential-gcr.tar.gz
+
+    - name: Configure Artifact Registry credentials
+      run: docker-credential-gcr configure-docker --registries=${{ inputs.registries }}
